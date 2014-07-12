@@ -1,4 +1,4 @@
-'''Provides Pygments and reStructuredText as a minimal WSGI application.'''
+'''Render Pygments, reStructuredText, and Markdown as a minimal WSGI application.'''
 
 import os.path
 import string
@@ -7,6 +7,7 @@ import pygments
 import pygments.lexers as lexers
 import pygments.formatters as formatters
 import docutils.core
+import markdown
 
 DIR = os.path.dirname(os.path.abspath(__file__))
 PAGE = string.Template(open(os.path.join(DIR, 'page.html')).read())
@@ -34,6 +35,8 @@ def application(env, start_response):
         ctype, content = 'text/plain; charset=utf-8', open(fname).read()
     elif fname.endswith('.rst') or fname.endswith('.rest'):
         body = rst2html(open(fname).read())
+    elif fname.endswith('.md'):
+        body = md2html(open(fname).read())
     else:
         body = pygmentize(fname)
     if content is None:
@@ -46,6 +49,9 @@ def application(env, start_response):
 
 def rst2html(buf):
     return docutils.core.publish_string(source=buf, writer_name='html')
+
+def md2html(buf):
+    return markdown.markdown(buf).encode('utf-8')
 
 def pygmentize(fname):
     buf = open(fname).read()

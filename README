@@ -1,1 +1,1 @@
-Provides Pygments and reStructuredText as a minimal WSGI application.
+Render Pygments, reStructuredText, and Markdown as a minimal WSGI application.

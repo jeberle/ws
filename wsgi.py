@@ -3,6 +3,7 @@
 import os.path
 import string
 import cgi
+import urllib
 
 import docutils.core
 import markdown
@@ -21,7 +22,7 @@ FORMATTER = formatters.HtmlFormatter(linenos=False, style='vs')
 
 def application(env, start_response):
     # fix up URI -> fname, w/ special case for "/static" stem
-    fname = env['REQUEST_URI']
+    fname = urllib.unquote_plus(env['REQUEST_URI'])
     if fname.startswith('/static/'):
         fname = os.path.normpath(fname.replace('/static', DIR))
         if fname == DIR:
@@ -73,10 +74,20 @@ def application(env, start_response):
 def listdir(fpath):
     m  = '<h1>%s</h1>\n' % fpath
     m += '<table id="dirlist">\n'
-    for name in os.listdir(fpath):
-        m += '<tr><td><a href="/%s">%s</a></td></tr>\n' % (os.path.join(fpath, name), name)
+    names = [ n for n in os.listdir(fpath) if not n.startswith('.') ]
+    if fpath == '.':
+        fpath = ''
+    else:
+        url = urllib.quote_plus(os.path.dirname(fpath), '/')
+        m += '<tr><td><a href="/%s">%s</a></td></tr>\n' % (url, '[..]')
+    for name in sorted(names, cmp_name):
+        url = urllib.quote_plus(os.path.join(fpath, name), '/')
+        m += '<tr><td><a href="%s">%s</a></td></tr>\n' % (url, name)
     m += '</table>\n'
     return m
+
+def cmp_name(a, b):
+    return cmp(os.path.isdir(b), os.path.isdir(a)) or cmp(a.lower(), b.lower())
 
 def rst2html(buf):
     return docutils.core.publish_string(source=buf, writer_name='html')

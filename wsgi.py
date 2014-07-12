@@ -17,9 +17,9 @@ LEX_MAP = {
 }
 
 def application(env, start_response):
-    resp, ctype, content = '200 OK', 'text/html; charset=utf-8', None
     method, uri = env['REQUEST_METHOD'], env['REQUEST_URI']
     fname, title = uri[1:], uri[1:]
+    resp, ctype, content = '200 OK', 'text/html; charset=utf-8', None
     if fname.startswith('static/'):
         fname = fname.replace('static', DIR)
     if method != 'GET':
@@ -31,11 +31,11 @@ def application(env, start_response):
     elif fname.endswith('.css'):
         ctype, content = 'text/css', open(fname).read()
     elif fname.endswith('.txt'):
-        ctype, content = 'text/plain', open(fname).read()
+        ctype, content = 'text/plain; charset=utf-8', open(fname).read()
     elif fname.endswith('.rst') or fname.endswith('.rest'):
         body = rst2html(open(fname).read())
     else:
-        body = pygmentize(open(fname).read())
+        body = pygmentize(fname)
     if content is None:
         content = PAGE.substitute({'title':title, 'body':body})
     start_response(resp, [
@@ -47,7 +47,8 @@ def application(env, start_response):
 def rst2html(buf):
     return docutils.core.publish_string(source=buf, writer_name='html')
 
-def pygmentize(buf):
+def pygmentize(fname):
+    buf = open(fname).read()
     ext = fname.rsplit('.', -1)[1] if '.' in fname else ''
     lexer = LEX_MAP[ext] if ext in LEX_MAP else lexers.guess_lexer(buf)
     formatter = formatters.HtmlFormatter(linenos=False, style='vs')

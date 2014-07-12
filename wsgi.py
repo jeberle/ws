@@ -1,49 +1,48 @@
 import os.path
-from pygments import highlight
-from pygments.lexers import guess_lexer
-from pygments.lexers import XmlLexer, PythonLexer, PerlLexer, BashLexer
-from pygments.formatters import HtmlFormatter
-from docutils.core import publish_file
+import string
+
+import pygments
+import pygments.lexers as lexers
+import pygments.formatters as formatters
+import docutils.core
 
 LEX_MAP = {
-    'sh': BashLexer(),
-    'pl': PerlLexer(),
-    'py': PythonLexer(),
-    'xml': XmlLexer(),
+    'sh': lexers.BashLexer(),
+    'pl': lexers.PerlLexer(),
+    'py': lexers.PythonLexer(),
+    'xml': lexers.XmlLexer(),
 }
+PAGE = string.Template(open('page.html').read())
 
 def application(env, start_response):
-    uri = env['REQUEST_URI']
-    fname = './%s' % uri[1:]
+    uri, content, resp, ctype = env['REQUEST_URI'], '', '200 OK', 'text/html'
+    fname, title = uri[1:], uri[1:]
     if not os.path.isfile(fname):
-        start_response('404 Not Found', [('Content-Type','text/html')])
-        return ['<pre>File not found</pre>\n']
-    if fname.endswith('.rst') or fname.endswith('.rest'):
-        ctype, out = rst2html(fname)
+        resp = '404 Not Found'
+        title, body = 'File not found', '<h2>File not found</h2>\n'
+    elif fname.endswith('.css'):
+        ctype, content = 'text/css', open(fname).read()
     elif fname.endswith('.txt'):
-        ctype, out = dump(fname)
+        ctype, content = 'text/plain', open(fname).read()
+    elif fname.endswith('.rst') or fname.endswith('.rest'):
+        body = rst2html(fname)
     else:
-        ctype, out = pygmentize(fname)
-    start_response('200 OK', [
+        body = pygmentize(fname)
+    if not content:
+        content = PAGE.substitute({'title':title, 'body':body})
+    start_response(resp, [
         ('Content-Type', ctype),
-        ('Content-Length', str(len(out)))
+        ('Content-Length', str(len(content)))
     ])
-    return [out]
+    return [content]
 
 def rst2html(fname):
-    return 'text/html', publish_file(source_path=fname, writer_name='html')
-
-def dump(fname):
-    return 'text/plain', open(fname).read()
+    return docutils.core.publish_string(source=open(fname).read(), writer_name='html')
 
 def pygmentize(fname):
-    ext = fname.rsplit('.', -1)[1] if '.' in fname else ''
     buf = open(fname).read()
-    if ext in LEX_MAP:
-        lexer = LEX_MAP[ext]
-    else:
-        lexer = guess_lexer(buf)
-    formatter = HtmlFormatter(linenos=False, style='vs')
-    out = highlight(buf, lexer, formatter).encode('utf-8')
-    return 'text/html', out
+    ext = fname.rsplit('.', -1)[1] if '.' in fname else ''
+    lexer = LEX_MAP[ext] if ext in LEX_MAP else lexers.guess_lexer(buf)
+    formatter = formatters.HtmlFormatter(linenos=False, style='vs')
+    return pygments.highlight(buf, lexer, formatter).encode('utf-8')
 

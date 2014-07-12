@@ -1,44 +1,67 @@
-'''Render Pygments, reStructuredText, and Markdown as a minimal WSGI application.'''
+'''Render Pygments, reStructuredText, and Markdown via a minimal WSGI application.'''
 
 import os.path
 import string
+import cgi
 
+import docutils.core
+import markdown
 import pygments
 import pygments.lexers as lexers
 import pygments.formatters as formatters
-import docutils.core
-import markdown
 
 DIR = os.path.dirname(os.path.abspath(__file__))
 PAGE = string.Template(open(os.path.join(DIR, 'page.html')).read())
-LEX_MAP = {
-    'sh': lexers.BashLexer(),
-    'pl': lexers.PerlLexer(),
-    'py': lexers.PythonLexer(),
+EXT_MAP = {
+    '.sh': lexers.BashLexer(),
+    '.pl': lexers.PerlLexer(),
+    '.py': lexers.PythonLexer(),
 }
+FORMATTER = formatters.HtmlFormatter(linenos=False, style='vs')
 
 def application(env, start_response):
-    method, uri = env['REQUEST_METHOD'], env['REQUEST_URI']
-    fname, title = uri[1:], uri[1:]
-    resp, ctype, content = '200 OK', 'text/html; charset=utf-8', None
-    if fname.startswith('static/'):
-        fname = fname.replace('static', DIR)
-    if method != 'GET':
+    # fix up URI -> fname, w/ special case for "/static" stem
+    fname = env['REQUEST_URI']
+    if fname.startswith('/static/'):
+        fname = os.path.normpath(fname.replace('/static', DIR))
+        if fname == DIR:
+            fname = '.'
+    elif fname == '/':
+        fname = '.'
+    else:
+        fname = fname[1:]
+    resp, ctype, title, content = '200 OK', 'text/html;charset=utf-8', None, None
+    if env['REQUEST_METHOD'] != 'GET':
         resp = '501 Not Implemented'
         title, body = 'Not Implemented', '<h2>Not Implemented</h2>\n'
+    ext = '.' + fname.rsplit('.', -1)[1] if '.' in fname else ''
+    # directory list
+    if os.path.isdir(fname):
+        body = listdir(fname)
+    # 404 file not found
     elif not os.path.isfile(fname):
         resp = '404 Not Found'
         title, body = 'File not found', '<h2>File not found</h2>\n'
-    elif fname.endswith('.css'):
+    # css
+    elif ext == '.css':
         ctype, content = 'text/css', open(fname).read()
-    elif fname.endswith('.txt'):
-        ctype, content = 'text/plain; charset=utf-8', open(fname).read()
-    elif fname.endswith('.rst') or fname.endswith('.rest'):
+    # html
+    elif ext == '.html':
+        content = open(fname).read()
+    # restructured text
+    elif ext == '.rst' or ext == '.rest':
         body = rst2html(open(fname).read())
-    elif fname.endswith('.md'):
+    # markdown
+    elif ext == '.md':
         body = md2html(open(fname).read())
+    # source code for syntax highlighting
+    elif ext in EXT_MAP:
+        body = pygmentize(open(fname).read(), EXT_MAP[ext])
+    # plain text
     else:
-        body = pygmentize(fname)
+        body = '<pre>%s</pre>\n' % cgi.escape(open(fname).read())
+    if title is None:
+        title = fname
     if content is None:
         content = PAGE.substitute({'title':title, 'body':body})
     start_response(resp, [
@@ -47,16 +70,20 @@ def application(env, start_response):
     ])
     return [content]
 
+def listdir(fpath):
+    m  = '<h1>%s</h1>\n' % fpath
+    m += '<table id="dirlist">\n'
+    for name in os.listdir(fpath):
+        m += '<tr><td><a href="/%s">%s</a></td></tr>\n' % (os.path.join(fpath, name), name)
+    m += '</table>\n'
+    return m
+
 def rst2html(buf):
     return docutils.core.publish_string(source=buf, writer_name='html')
 
 def md2html(buf):
     return markdown.markdown(buf).encode('utf-8')
 
-def pygmentize(fname):
-    buf = open(fname).read()
-    ext = fname.rsplit('.', -1)[1] if '.' in fname else ''
-    lexer = LEX_MAP[ext] if ext in LEX_MAP else lexers.guess_lexer(buf)
-    formatter = formatters.HtmlFormatter(linenos=False, style='vs')
-    return pygments.highlight(buf, lexer, formatter).encode('utf-8')
+def pygmentize(buf, lexer):
+    return pygments.highlight(buf, lexer, FORMATTER).encode('utf-8')
 

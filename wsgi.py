@@ -8,93 +8,137 @@ import urllib
 import docutils.core
 import markdown
 import pygments
-import pygments.lexers as lexers
-import pygments.formatters as formatters
+import pygments.lexers
+import pygments.formatters
 
 DIR = os.path.dirname(os.path.abspath(__file__))
-PAGE = string.Template(open(os.path.join(DIR, 'page.html')).read())
-EXT_MAP = {
-    '.sh': lexers.BashLexer(),
-    '.pl': lexers.PerlLexer(),
-    '.py': lexers.PythonLexer(),
-}
-FORMATTER = formatters.HtmlFormatter(linenos=False, style='vs')
+TMPL = string.Template(open(os.path.join(DIR, 'page.html')).read())
 
 def application(env, start_response):
-    # fix up URI -> fname, w/ special case for "/static" stem
-    fname = urllib.unquote_plus(env['REQUEST_URI'])
-    if fname.startswith('/static/'):
-        fname = os.path.normpath(fname.replace('/static', DIR))
-        if fname == DIR:
-            fname = '.'
-    elif fname == '/':
-        fname = '.'
-    else:
-        fname = fname[1:]
-    resp, ctype, title, content = '200 OK', 'text/html;charset=utf-8', None, None
-    if env['REQUEST_METHOD'] != 'GET':
-        resp = '501 Not Implemented'
-        title, body = 'Not Implemented', '<h2>Not Implemented</h2>\n'
-    ext = '.' + fname.rsplit('.', -1)[1] if '.' in fname else ''
-    # directory list
-    if os.path.isdir(fname):
-        body = listdir(fname)
-    # 404 file not found
-    elif not os.path.isfile(fname):
-        resp = '404 Not Found'
-        title, body = 'File not found', '<h2>File not found</h2>\n'
-    # css
-    elif ext == '.css':
-        ctype, content = 'text/css', open(fname).read()
-    # html
-    elif ext == '.html':
-        content = open(fname).read()
-    # restructured text
-    elif ext == '.rst' or ext == '.rest':
-        body = rst2html(open(fname).read())
-    # markdown
-    elif ext == '.md':
-        body = md2html(open(fname).read())
-    # source code for syntax highlighting
-    elif ext in EXT_MAP:
-        body = pygmentize(open(fname).read(), EXT_MAP[ext])
-    # plain text
-    else:
-        body = '<pre>%s</pre>\n' % cgi.escape(open(fname).read())
-    if title is None:
-        title = fname
-    if content is None:
-        content = PAGE.substitute({'title':title, 'body':body})
-    start_response(resp, [
+    resp_code, doc = handle(env)
+    ctype, content = doc
+    start_response(resp_code, [
         ('Content-Type', ctype),
         ('Content-Length', str(len(content)))
     ])
     return [content]
 
+def handle(env):
+    if env['REQUEST_METHOD'] != 'GET':
+        return '501 Not Implemented', not_impl()
+    fpath = resolve(env['REQUEST_URI'])
+    if os.path.isdir(fpath):
+        return '200 OK', listdir(fpath)
+    if os.path.isfile(fpath):
+        return '200 OK', showfile(fpath)
+    else:
+        return '404 Not Found', not_found()
+
+def resolve(uri):
+    '''resolve URI -> fpath, w/ special case for "/static" stem'''
+    fpath = urllib.unquote_plus(uri)
+    if fpath.startswith('/static/'):
+        fpath = os.path.normpath(fpath.replace('/static', DIR))
+        if fpath == DIR:
+            fpath = '.'
+    elif fpath == '/':
+        fpath = '.'
+    else:
+        fpath = fpath[1:]
+    return fpath
+
+# --- files ---
+
+def showfile(fpath):
+    ext = '.' + fpath.rsplit('.', -1)[1] if '.' in fpath else ''
+    if ext in EXT_MAP:
+        return EXT_MAP[ext](fpath)
+    else:
+        return txt(fpath)
+
+def txt(fpath):
+    return page(title(fpath), '<pre>%s</pre>\n' % cgi.escape(open(fpath).read()))
+
+def rst(fpath):
+    parts = docutils.core.publish_parts(source=open(fpath).read(), writer_name='html')
+    return page(parts['head'], parts['html_body'])
+
+def md(fpath):
+    return page(title(fpath), markdown.markdown(open(fpath).read()))
+
+def cat(ctype):
+    def f(fpath):
+        return (ctype, open(fpath).read())
+    return f
+
+def code(lexer):
+    def f(fpath):
+        body = pygments.highlight(open(fpath).read(), lexer, FORMATTER)
+        return page(title(fpath), body)
+    return f
+
+# --- directories ---
+
 def listdir(fpath):
-    m  = '<h1>%s</h1>\n' % fpath
+    m = h1(fpath)
     m += '<table id="dirlist">\n'
     names = [ n for n in os.listdir(fpath) if not n.startswith('.') ]
     if fpath == '.':
         fpath = ''
     else:
         url = urllib.quote_plus(os.path.dirname(fpath), '/')
-        m += '<tr><td><a href="/%s">%s</a></td></tr>\n' % (url, '[..]')
+        m += tr(td(a_href(url, '[..]')))
     for name in sorted(names, cmp_name):
         url = urllib.quote_plus(os.path.join(fpath, name), '/')
-        m += '<tr><td><a href="%s">%s</a></td></tr>\n' % (url, name)
+        m += tr(td(a_href(url, name)))
     m += '</table>\n'
-    return m
+    return page(title(fpath), m)
 
 def cmp_name(a, b):
     return cmp(os.path.isdir(b), os.path.isdir(a)) or cmp(a.lower(), b.lower())
 
-def rst2html(buf):
-    return docutils.core.publish_string(source=buf, writer_name='html')
+# --- etc ---
 
-def md2html(buf):
-    return markdown.markdown(buf).encode('utf-8')
+EXT_MAP = {
+    '.txt': txt,
+    '.rst': rst,
+    '.rest': rst,
+    '.md': md,
+    '.css': cat('text/css'),
+    '.html': cat('text/html'),
+    '.sh': code(pygments.lexers.BashLexer()),
+    '.pl': code(pygments.lexers.PerlLexer()),
+    '.py': code(pygments.lexers.PythonLexer()),
+}
+FORMATTER = pygments.formatters.HtmlFormatter(linenos=False, style='vs')
 
-def pygmentize(buf, lexer):
-    return pygments.highlight(buf, lexer, FORMATTER).encode('utf-8')
+def not_found():
+    return page(title('File not found'), h2('File not found'))
+
+def not_impl():
+    return page(title('Not Implemented'), h2('Not Implemented'))
+
+def page(head, body):
+    head, body = head.encode('utf-8'), body.encode('utf-8')
+    return 'text/html', TMPL.substitute({'head':head, 'body':body})
+
+# --- sorry ---
+
+def title(s):
+    return '<title>%s</title>\n' % s
+
+def h1(s):
+    return '<h1>%s</h1>\n' % s
+
+def h2(s):
+    return '<h2>%s</h2>\n' % s
+
+def tr(s):
+    return '<tr>%s</tr>\n' % s
+
+def td(s):
+    return '<td>%s</td>' % s
+
+def a_href(s, t):
+    return '<a href="%s">%s</a>' % (s, t)
 

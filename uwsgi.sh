@@ -17,7 +17,7 @@ uwsgi --http-socket "$SOCKET" --chdir2 "$SRVDIR" --log-micros \
   --cache2 'name=cache1,items=100' \
   --route '\.css$ cache:key=${REQUEST_URI},name=cache1,content_type=text/css' \
   --route '\.png$ cache:key=${REQUEST_URI},name=cache1,content_type=image/png' \
-  --route '.* cache:key=${REQUEST_URI},name=cache1,content_type=text/html;charset=utf-8' \
+  --route '.* cache:key=${REQUEST_URI},name=cache1,content_type=text/html' \
   --route '.* cachestore:key=${REQUEST_URI},name=cache1,expires='"$EXPIRES" \
   "$@"
 

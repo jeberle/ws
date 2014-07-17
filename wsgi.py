@@ -60,7 +60,8 @@ def txt(fpath):
     return page(title(fpath), '<pre>%s</pre>\n' % cgi.escape(open(fpath).read()))
 
 def rst(fpath):
-    parts = docutils.core.publish_parts(source=open(fpath).read(), writer_name='html')
+    parts = docutils.core.publish_parts(source=open(fpath).read(), writer_name='html',
+        settings_overrides={'syntax_highlight': 'short'})
     return page(parts['head'], parts['html_body'])
 
 def md(fpath):
@@ -106,6 +107,8 @@ EXT_MAP = {
     '.md': md,
     '.css': cat('text/css'),
     '.html': cat('text/html'),
+    '.json': code(pygments.lexers.JavascriptLexer()),
+    '.js': code(pygments.lexers.JavascriptLexer()),
     '.sh': code(pygments.lexers.BashLexer()),
     '.pl': code(pygments.lexers.PerlLexer()),
     '.py': code(pygments.lexers.PythonLexer()),
@@ -122,7 +125,7 @@ def page(head, body):
     head, body = head.encode('utf-8'), body.encode('utf-8')
     return 'text/html', TMPL.substitute({'head':head, 'body':body})
 
-# --- sorry ---
+# --- tags ---
 
 def title(s):
     return '<title>%s</title>\n' % s

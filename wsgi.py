@@ -84,11 +84,9 @@ def listdir(fpath):
     m = h1(fpath)
     m += '<table id="dirlist">\n'
     names = [ n for n in os.listdir(fpath) if not n.startswith('.') ]
-    if fpath == '.':
-        fpath = ''
-    else:
+    if fpath != '.':
         url = urllib.quote_plus(os.path.dirname(fpath), '/')
-        m += tr(td(a_href(url, '[..]')))
+        m += tr(td(a_href('/'+url, '[..]')))
     for name in sorted(names, cmp_name):
         url = urllib.quote_plus(os.path.join(fpath, name), '/')
         m += tr(td(a_href(url, name)))

@@ -28,7 +28,7 @@ def handle(env):
         return '501 Not Implemented', not_impl()
     fpath = resolve(env['REQUEST_URI'])
     if os.path.isdir(fpath):
-        return '200 OK', listdir(fpath)
+        return '200 OK', listdir(fpath, env['SCRIPT_NAME'])
     if os.path.isfile(fpath):
         return '200 OK', showfile(fpath)
     else:
@@ -80,15 +80,17 @@ def code(lexer):
 
 # --- directories ---
 
-def listdir(fpath):
+def listdir(fpath, script_name):
     m = h1(fpath)
     m += '<table id="dirlist">\n'
     names = [ n for n in os.listdir(fpath) if not n.startswith('.') ]
-    if fpath != '.':
-        url = urllib.quote_plus(os.path.dirname(fpath), '/')
-        m += tr(td(a_href('/'+url, '[..]')))
+    if fpath == '.':
+        fpath = ''
+    else:
+        url = '%s/%s' % (script_name, os.path.dirname(fpath))
+        m += tr(td(a_href(url, '[..]')))
     for name in sorted(names, cmp_name):
-        url = urllib.quote_plus(os.path.join(fpath, name), '/')
+        url = '%s/%s' % (script_name, os.path.join(fpath, name))
         m += tr(td(a_href(url, name)))
     m += '</table>\n'
     return page(title(fpath), m)
@@ -141,5 +143,5 @@ def td(s):
     return '<td>%s</td>' % s
 
 def a_href(s, t):
-    return '<a href="%s">%s</a>' % (s, t)
+    return '<a href="%s">%s</a>' % (urllib.quote_plus(s, '/'), t)
 

@@ -12,7 +12,7 @@ shift 3
 
 uwsgi --http-socket "$SOCKET" --chdir2 "$SRVDIR" --log-micros \
   --master --processes 2 \
-  --plugin python --wsgi-file "$DIR/"wsgi.py \
+  --plugin python --wsgi-file "$DIR"/wsgi.py \
   --plugin router_cache \
   --cache2 'name=cache1,items=100' \
   --route '\.css$ cache:key=${REQUEST_URI},name=cache1,content_type=text/css' \

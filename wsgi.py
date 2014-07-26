@@ -12,6 +12,7 @@ import pygments.lexers
 import pygments.formatters
 
 DIR = os.path.dirname(os.path.abspath(__file__))
+THEME = 'sphinx13'
 
 def application(env, start_response):
     resp_code, doc = handle(env)
@@ -37,7 +38,7 @@ def resolve(uri):
     '''resolve URI -> fpath, w/ special case for "/static" stem'''
     fpath = urllib.unquote_plus(uri)
     if fpath.startswith('/static/'):
-        fpath = os.path.normpath(fpath.replace('/static', DIR))
+        fpath = os.path.normpath(fpath.replace('/static', os.path.join(DIR, THEME)))
         if fpath == DIR:
             fpath = '.'
     elif fpath == '/':
@@ -126,7 +127,7 @@ def not_impl(root):
 
 def page(root, head, body):
     head, body = head.encode('utf-8'), body.encode('utf-8')
-    tmpl = string.Template(open(os.path.join(DIR, 'page.html')).read())
+    tmpl = string.Template(open(os.path.join(DIR, THEME, 'page.html')).read())
     return 'text/html', tmpl.substitute({'root':root, 'head':head, 'body':body})
 
 # --- tags ---

@@ -61,7 +61,7 @@ def txt(root, fpath):
 
 def rst(root, fpath):
     parts = docutils.core.publish_parts(source=open(fpath).read(), writer_name='html',
-        settings_overrides={'syntax_highlight': 'short'})
+        settings_overrides={'syntax_highlight': 'short', 'math_output': 'MathML'})
     return page(root, parts['head'], parts['html_body'])
 
 def md(root, fpath):

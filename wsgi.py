@@ -73,7 +73,7 @@ def cat(ctype):
         return (ctype, open(fpath).read())
     return f
 
-def code(lexer):
+def highlight(lexer):
     def f(root, fpath):
         body = pygments.highlight(open(fpath).read(), lexer, FORMATTER)
         return page(root, title(fpath), body)
@@ -111,11 +111,11 @@ EXT_MAP = {
     '.gif': cat('image/gif'),
     '.png': cat('image/png'),
     '.jpg': cat('image/jpeg'),
-    '.json': code(pygments.lexers.JavascriptLexer()),
-    '.js': code(pygments.lexers.JavascriptLexer()),
-    '.sh': code(pygments.lexers.BashLexer()),
-    '.pl': code(pygments.lexers.PerlLexer()),
-    '.py': code(pygments.lexers.PythonLexer()),
+    '.json': highlight(pygments.lexers.JavascriptLexer()),
+    '.js': highlight(pygments.lexers.JavascriptLexer()),
+    '.sh': highlight(pygments.lexers.BashLexer()),
+    '.pl': highlight(pygments.lexers.PerlLexer()),
+    '.py': highlight(pygments.lexers.PythonLexer()),
 }
 FORMATTER = pygments.formatters.HtmlFormatter(linenos=False, style='vs')
 

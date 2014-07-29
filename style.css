@@ -4,6 +4,7 @@ body {
   color: #111;
   width: 900px;
   margin: 20px;
+  line-height: 1.4;
 }
 
 li, dt, dd {

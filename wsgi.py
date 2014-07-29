@@ -11,8 +11,13 @@ import pygments
 import pygments.lexers
 import pygments.formatters
 
+import tag as t
+
 DIR = os.path.dirname(os.path.abspath(__file__))
 THEME = '.'
+from page import page
+#__import__("page")
+#page = page.page
 
 def application(env, start_response):
     resp_code, doc = handle(env)
@@ -58,7 +63,7 @@ def showfile(root, fpath):
 
 def txt(root, fpath):
     buf = unicode(open(fpath).read(), encoding='utf-8')
-    return page(root, title(fpath), pre(cgi.escape(buf)))
+    return page(root, t.title(fpath), t.pre(cgi.escape(buf)))
 
 def rst(root, fpath):
     parts = docutils.core.publish_parts(source=open(fpath).read(), writer_name='html',
@@ -66,7 +71,7 @@ def rst(root, fpath):
     return page(root, parts['head'], parts['html_body'])
 
 def md(root, fpath):
-    return page(root, title(fpath), markdown.markdown(open(fpath).read()))
+    return page(root, t.title(fpath), markdown.markdown(open(fpath).read()))
 
 def cat(ctype):
     def f(root, fpath):
@@ -76,14 +81,14 @@ def cat(ctype):
 def highlight(lexer):
     def f(root, fpath):
         body = pygments.highlight(open(fpath).read(), lexer, FORMATTER)
-        return page(root, title(fpath), body)
+        return page(root, t.title(fpath), body)
     return f
 
 # --- directories ---
 
 def listdir(root, fpath):
-    body = [h1(fpath), table('dirlist', rows(root, fpath))]
-    return page(root, title(fpath), body)
+    body = [t.h1(fpath), t.table(rows(root, fpath))]
+    return page(root, t.title(fpath), body)
 
 def rows(root, fpath):
     names = [ n for n in os.listdir(fpath) if not n.startswith('.') ]
@@ -91,10 +96,12 @@ def rows(root, fpath):
         fpath = ''
     else:
         url = '%s/%s' % (root, os.path.dirname(fpath))
-        yield tr(td(a_href(url, '[..]')))
+        a = t.a('[..]', [('href', urllib.quote_plus(url, '/'))])
+        yield t.tr(t.td(a))
     for name in sorted(names, cmp_name):
         url = '%s/%s' % (root, os.path.join(fpath, name))
-        yield tr(td(a_href(url, name)))
+        a = t.a(name, [('href', urllib.quote_plus(url, '/'))])
+        yield t.tr(t.td(a))
 
 def cmp_name(a, b):
     return cmp(os.path.isdir(b), os.path.isdir(a)) or cmp(a.lower(), b.lower())
@@ -120,48 +127,8 @@ EXT_MAP = {
 FORMATTER = pygments.formatters.HtmlFormatter(linenos=False, style='vs')
 
 def not_found(root):
-    return page(root, title('File not found'), h2('File not found'))
+    return page(root, t.title('File not found'), t.h2('File not found'))
 
 def not_impl(root):
-    return page(root, title('Not Implemented'), h2('Not Implemented'))
-
-def page(root, head, body):
-    head = ''.join(flatten(head)).encode('utf-8')
-    body = ''.join(flatten(body)).encode('utf-8')
-    tmpl = string.Template(open(os.path.join(DIR, THEME, 'page.html')).read())
-    return 'text/html', tmpl.substitute({'root':root, 'head':head, 'body':body})
-
-# --- tags ---
-
-def title(a):
-    return ['<title>', a, '</title>\n']
-
-def h1(a):
-    return ['<h1>', a, '</h1>\n']
-
-def h2(a):
-    return ['<h2>', a, '</h2>\n']
-
-def table(tid, a):
-    return ['<table id="%s">\n' % tid, a, '</table>\n']
-
-def tr(a):
-    return ['<tr>', a, '</tr>\n']
-
-def td(a):
-    return ['<td>', a, '</td>']
-
-def a_href(url, a):
-    return ['<a href="%s">' % urllib.quote_plus(url, '/'), a, '</a>']
-
-def pre(a):
-    return ['<pre>', a, '</pre>\n']
-
-def flatten(a):
-    if type(a) in (type(''), type(u'')):
-        yield a
-    else:
-        for v in a:
-            for w in flatten(v):
-                yield w
+    return page(root, t.title('Not Implemented'), t.h2('Not Implemented'))
 

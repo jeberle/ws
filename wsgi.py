@@ -1,9 +1,11 @@
 '''Render Pygments, reStructuredText, and Markdown via a minimal WSGI application.'''
 
+import sys
 import os.path
 import string
 import cgi
 import urllib
+import importlib
 
 import docutils.core
 import markdown
@@ -11,13 +13,12 @@ import pygments
 import pygments.lexers
 import pygments.formatters
 
-import tag as t
-
 DIR = os.path.dirname(os.path.abspath(__file__))
 THEME = '.'
-from page import page
-#__import__("page")
-#page = page.page
+
+sys.path.insert(0, DIR)
+import tag as t
+page = importlib.import_module('page' if THEME == '.' else '%s.page' % THEME).page
 
 def application(env, start_response):
     resp_code, doc = handle(env)
@@ -106,6 +107,14 @@ def rows(root, fpath):
 def cmp_name(a, b):
     return cmp(os.path.isdir(b), os.path.isdir(a)) or cmp(a.lower(), b.lower())
 
+# --- errors ---
+
+def not_found(root):
+    return page(root, t.title('File not found'), t.h2('File not found'))
+
+def not_impl(root):
+    return page(root, t.title('Not Implemented'), t.h2('Not Implemented'))
+
 # --- etc ---
 
 EXT_MAP = {
@@ -125,10 +134,4 @@ EXT_MAP = {
     '.py': highlight(pygments.lexers.PythonLexer()),
 }
 FORMATTER = pygments.formatters.HtmlFormatter(linenos=False, style='vs')
-
-def not_found(root):
-    return page(root, t.title('File not found'), t.h2('File not found'))
-
-def not_impl(root):
-    return page(root, t.title('Not Implemented'), t.h2('Not Implemented'))
 

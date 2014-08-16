@@ -10,9 +10,14 @@ import markdown
 import pygments
 import pygments.lexers
 import pygments.formatters
+from jinja2 import Environment, FileSystemLoader
+import yaml
 
 DIR = os.path.dirname(os.path.abspath(__file__))
 THEME = '.'
+ENV = Environment(autoescape=True, trim_blocks=True, lstrip_blocks=True,
+    loader=FileSystemLoader('.'),
+    extensions=['jinja2.ext.autoescape'])
 
 def application(env, start_response):
     resp_code, doc = handle(env)
@@ -59,6 +64,12 @@ def showfile(root, fpath):
 def txt(root, fpath):
     buf = unicode(open(fpath).read(), encoding='utf-8')
     return page(root, title(fpath), pre(cgi.escape(buf)))
+
+def yml(root, fpath):
+    buf = unicode(open(fpath).read(), encoding='utf-8')
+    d = yaml.load(buf)
+    tmpl = ENV.get_template(fpath.replace('.yml', '.html'))
+    return 'text/html', tmpl.render(d).encode('utf-8')
 
 def rst(root, fpath):
     parts = docutils.core.publish_parts(source=open(fpath).read(), writer_name='html',
@@ -116,6 +127,7 @@ EXT_MAP = {
     '.sh': highlight(pygments.lexers.BashLexer()),
     '.pl': highlight(pygments.lexers.PerlLexer()),
     '.py': highlight(pygments.lexers.PythonLexer()),
+    '.yml': yml,
 }
 FORMATTER = pygments.formatters.HtmlFormatter(linenos=False, style='vs')
 

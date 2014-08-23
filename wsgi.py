@@ -6,7 +6,8 @@ import cgi
 import urllib
 
 import docutils.core
-import markdown
+from markdown import markdown
+from textile import textile
 import pygments
 import pygments.lexers
 import pygments.formatters
@@ -77,7 +78,11 @@ def rst(root, fpath):
     return page(root, parts['head'], parts['html_body'])
 
 def md(root, fpath):
-    return page(root, title(fpath), markdown.markdown(open(fpath).read()))
+    return page(root, title(fpath), markdown(open(fpath).read()))
+
+def txtl(root, fpath):
+    buf = textile(open(fpath).read(), html_type='html', auto_link=True, encoding='utf-8')
+    return page(root, title(fpath), buf)
 
 def cat(ctype):
     def f(root, fpath):
@@ -117,6 +122,8 @@ EXT_MAP = {
     '.rst': rst,
     '.rest': rst,
     '.md': md,
+    '.txtl': txtl,
+    '.textile': txtl,
     '.css': cat('text/css'),
     '.html': cat('text/html'),
     '.gif': cat('image/gif'),

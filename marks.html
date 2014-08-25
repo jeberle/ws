@@ -7,11 +7,19 @@
 <style>
 div.float-left {
   float: left;
-  margin-bottom: 1em;
-  width: 280px;
+  width: 450px;
 }
 div.clear-left {
   clear: left;
+}
+h1, h2.col-hdr {
+  margin-bottom: 0px;
+}
+ul.flat {
+  margin-top: 0px;
+}
+ul.flat li {
+  line-height: 1.2;
 }
 </style>
 </head>
@@ -20,14 +28,14 @@ div.clear-left {
 {% for sec in sections %}
 
 <div class='float-left'>
-<h2>{{ sec.hdr }}</h2>
+<h2 class='col-hdr'>{{ sec.hdr }}</h2>
 <ul class='flat'>
 {% for ln in sec.links %}
 <li><a href='{{ ln.url }}'>{{ ln.name }}</a></li>
 {% endfor %}
 </ul>
 </div>
-{% if loop.index is divisibleby 3 %}<div class='clear-left'></div>{% endif %}
+{% if loop.index is divisibleby 2 %}<div class='clear-left'></div>{% endif %}
 {% endfor %}
 
 </body>

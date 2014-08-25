@@ -1,6 +1,7 @@
 
 body {
-  font: 13px Helvetica, Arial, freesans, clean, sans-serif;
+  font-family: Helvetica, Arial, freesans, clean, sans-serif;
+  font-size: 13px;
   color: #111;
   width: 900px;
   margin: 20px;

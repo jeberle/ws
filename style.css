@@ -24,6 +24,19 @@ h3, h4, h5, h6 {
   font-size: 16px;
 }
 
+a {
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+ul.flat {
+  list-style: none;
+  padding-left: 0pt;
+}
+
 /*
 p, blockquote, ul, ol, dl, table, pre {
   margin: 15px 0;

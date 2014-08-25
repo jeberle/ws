@@ -7,8 +7,10 @@
 </head>
 <body>
 <h1>{{ title }}</h1>
-{% autoescape false %}
-{{ body }}
-{% endautoescape %}
+<ul class='flat'>
+{% for r in rows %}
+<li><a href='{{ r.url }}'>{{ r.name }}</a></li>
+{% endfor %}
+</ul>
 </body>
 </html>{# vi: set ft=htmldjango: #}

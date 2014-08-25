@@ -6,7 +6,7 @@
 <title>{{ title }}</title>
 </head>
 <body>
-<h1>{{ title }}</h1>
+{%if h1 %}<h1>{{ h1 }}</h1>{% endif %}
 {% autoescape false %}
 {{ body }}
 {% endautoescape %}

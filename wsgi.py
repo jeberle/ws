@@ -5,13 +5,13 @@ import re
 import cgi
 import urllib
 
+from jinja2 import Environment, FileSystemLoader
 from docutils.core import publish_parts
 from markdown import markdown
 from textile import textile
 import pygments
 import pygments.lexers
 import pygments.formatters
-from jinja2 import Environment, FileSystemLoader
 import yaml
 
 DIR = os.path.dirname(os.path.abspath(__file__))
@@ -30,9 +30,10 @@ def application(env, start_response):
     return [content]
 
 def handle(env):
-    if env['REQUEST_METHOD'] != 'GET':
+    root, method, uri = env['SCRIPT_NAME'], env['REQUEST_METHOD'], env['REQUEST_URI']
+    if method != 'GET':
         return '501 Not Implemented', page(root, 'Not Implemented', '')
-    root, fpath = env['SCRIPT_NAME'], resolve(env['REQUEST_URI'])
+    fpath = resolve(uri)
     if os.path.isdir(fpath):
         return '200 OK', listdir(root, fpath)
     if os.path.isfile(fpath):
@@ -66,7 +67,7 @@ def showfile(root, fpath):
 
 def txt(root, fpath):
     buf = unicode(open(fpath).read(), encoding='utf-8')
-    return page(root, fpath, '<pre>%s</pre>' % cgi.escape(buf))
+    return page(root, fpath, u'<pre>%s</pre>' % cgi.escape(buf))
 
 def yml(root, fpath):
     buf = unicode(open(fpath).read(), encoding='utf-8')
@@ -76,8 +77,8 @@ def yml(root, fpath):
 
 def rst(root, fpath):
     parts = publish_parts(source=open(fpath).read(), writer_name='html',
-        settings_overrides={'syntax_highlight': 'short', 'math_output': 'MathML'})
-    return page(root, parts['head'], parts['html_body'])
+        settings_overrides={'syntax_highlight': 'short', 'math_output': 'MathML', 'doctitle_xform':True})
+    return page2(root, parts['title'], parts['html_body'])
 
 def md(root, fpath):
     return page(root, fpath, markdown(open(fpath).read()))
@@ -86,21 +87,21 @@ def txtl(root, fpath):
     buf = textile(open(fpath).read(), html_type='html', auto_link=True, encoding='utf-8')
     return page(root, fpath, buf)
 
-def cat(ctype):
-    def f(root, fpath):
-        return (ctype, open(fpath).read())
-    return f
-
 def highlight(lexer):
     def f(root, fpath):
         body = pygments.highlight(open(fpath).read(), lexer, FORMATTER)
         return page(root, fpath, body)
     return f
 
+def cat(ctype):
+    def f(root, fpath):
+        return (ctype, open(fpath).read())
+    return f
+
 # --- directories ---
 
 def listdir(root, fpath):
-    return render(root, fpath, {'rows': rows(root, fpath)}, 'dirlist.html')
+    return render('dirlist.html', root=root, title=fpath, rows=rows(root, fpath))
 
 def rows(root, fpath):
     names = [ n for n in os.listdir(fpath) if not n.startswith('.') ]
@@ -120,7 +121,7 @@ def cmp_name(a, b):
 
 def marks(root, fpath):
     title, sections = load_marks(fpath)
-    return render(root, title, {'sections': sections}, 'marks.html')
+    return render('marks.html', root=root, title=title, sections=sections)
 
 def load_marks(fpath):
     f = open(fpath)
@@ -154,25 +155,28 @@ EXT_MAP = {
     '.txtl': txtl,
     '.textile': txtl,
     '.css': cat('text/css'),
+    '.js': cat('text/javascript'),
     '.html': cat('text/html'),
+    '.xml': cat('text/xml'),
     '.gif': cat('image/gif'),
     '.png': cat('image/png'),
     '.jpg': cat('image/jpeg'),
     '.json': highlight(pygments.lexers.JavascriptLexer()),
-    '.js': highlight(pygments.lexers.JavascriptLexer()),
     '.sh': highlight(pygments.lexers.BashLexer()),
     '.pl': highlight(pygments.lexers.PerlLexer()),
     '.py': highlight(pygments.lexers.PythonLexer()),
+    '.vim': highlight(pygments.lexers.VimLexer()),
     '.yml': yml,
 }
 FORMATTER = pygments.formatters.HtmlFormatter(linenos=False, style='vs')
 
 def page(root, title, body):
-    return render(root, title, {'body': body.encode('utf-8')}, 'page.html')
+    return render('page.html', root=root, title=title, h1=title, body=body)
 
-def render(root, title, ctx, tmplname):
-    ctx['root'] = root
-    ctx['title'] = title
+def page2(root, title, body):
+    return render('page.html', root=root, title=title, body=body)
+
+def render(tmplname, **kwargs):
     tmpl = ENV.get_template(tmplname)
-    return 'text/html', tmpl.render(ctx).encode('utf-8')
+    return 'text/html', tmpl.render(kwargs).encode('utf-8')
 

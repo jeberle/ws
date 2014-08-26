@@ -16,7 +16,7 @@ import yaml
 
 DIR = os.path.dirname(os.path.abspath(__file__))
 THEME = '.'
-OVERRIDES = {'syntax_highlight': 'short', 'math_output': 'MathML'}
+OVERRIDES = {'syntax_highlight': 'short', 'math_output': 'MathML', 'smart_quotes': True}
 
 def application(env, start_response):
     resp_code, doc = handle(env)

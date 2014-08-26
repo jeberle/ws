@@ -11,7 +11,7 @@ EXPIRES=${3:-15}
 shift 3
 
 uwsgi --http-socket "$SOCKET" --chdir2 "$SRVDIR" \
-  --master --processes 2 \
+  --master --processes 2 --no-orphans \
   --plugin python --wsgi-file "$DIR"/wsgi.py \
   --plugin router_cache \
   --cache2 'name=cache1,items=100' \

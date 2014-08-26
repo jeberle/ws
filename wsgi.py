@@ -72,10 +72,10 @@ def txt(root, fpath):
 def html(root, fpath):
     buf = unicode(open(fpath).read(), encoding='utf-8')
     yml = fpath.replace('.html', '.yml')
+    d = {'root': root, 'year': 2014}
     if os.path.isfile(yml):
         buf = unicode(open(yml).read(), encoding='utf-8')
-        d = yaml.load(buf)
-    d['root'], d['year'] = root, 2014
+        d.update(yaml.load(buf))
     tmpl = ENV.get_template(fpath)
     return 'text/html', tmpl.render(d).encode('utf-8')
 

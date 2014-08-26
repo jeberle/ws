@@ -10,7 +10,7 @@ SRVDIR=${2:-.}
 EXPIRES=${3:-15}
 shift 3
 
-uwsgi --http-socket "$SOCKET" --chdir2 "$SRVDIR" --log-micros \
+uwsgi --http-socket "$SOCKET" --chdir2 "$SRVDIR" \
   --master --processes 2 \
   --plugin python --wsgi-file "$DIR"/wsgi.py \
   --plugin router_cache \
@@ -19,5 +19,6 @@ uwsgi --http-socket "$SOCKET" --chdir2 "$SRVDIR" --log-micros \
   --route '\.png$ cache:key=${REQUEST_URI},name=cache1,content_type=image/png' \
   --route '.* cache:key=${REQUEST_URI},name=cache1,content_type=text/html' \
   --route '.* cachestore:key=${REQUEST_URI},name=cache1,expires='"$EXPIRES" \
+  --log-format '%(ctime) %(status) %(msecs) %(size) %(method) %(uri)' \
   "$@"
 

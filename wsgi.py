@@ -59,7 +59,7 @@ def resolve(uri):
 def showfile(root, fpath):
     if os.path.basename(os.path.dirname(os.path.abspath(fpath))) == 'marks':
         return marks(root, fpath)
-    ext = '.' + fpath.rsplit('.', -1)[1] if '.' in fpath else ''
+    ext = '.' + fpath.rsplit('.', 1)[1] if '.' in fpath else ''
     if ext in EXT_MAP:
         return EXT_MAP[ext](root, fpath)
     else:
@@ -160,12 +160,12 @@ EXT_MAP = {
     '.textile': txtl,
     '.html': html,
     '.css': cat('text/css'),
-    '.js': cat('text/javascript'),
     '.xml': cat('text/xml'),
     '.gif': cat('image/gif'),
     '.png': cat('image/png'),
     '.jpg': cat('image/jpeg'),
     '.svg': cat('image/svg+xml'),
+    '.js': cat('application/x-javascript'),
     '.json': highlight(pygments.lexers.JavascriptLexer()),
     '.sh': highlight(pygments.lexers.BashLexer()),
     '.pl': highlight(pygments.lexers.PerlLexer()),

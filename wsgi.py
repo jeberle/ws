@@ -236,7 +236,25 @@ class Markdown(Extension):
     def _render(self, caller):
         return markdown(caller())
 
+
+class Pygments(Extension):
+    '''add {% code 'lexer-alias' %}...{% endcode %} custom tag'''
+    tags = set(['code'])
+
+    def __init__(self, environment):
+        super(Pygments, self).__init__(environment)
+
+    def parse(self, parser):
+        lineno = parser.stream.next().lineno
+        alias = parser.parse_expression()
+        body = parser.parse_statements(['name:endcode'], drop_needle=True)
+        return nodes.CallBlock(self.call_method('_render', [alias]), [], [], body).set_lineno(lineno)
+
+    def _render(self, alias, caller):
+        return pygments.highlight(caller().encode('utf-8'), pygments.lexers.get_lexer_by_name(alias), FORMATTER)
+
+
 ENV = Environment(autoescape=True, trim_blocks=True, lstrip_blocks=True,
     loader=FileSystemLoader(['.', os.path.join(DIR, THEME)]),
-    extensions=['jinja2.ext.autoescape', Restructured, Textile, Markdown])
+    extensions=['jinja2.ext.autoescape', Restructured, Textile, Markdown, Pygments])
 

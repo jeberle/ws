@@ -16,9 +16,7 @@ import yaml
 
 DIR = os.path.dirname(os.path.abspath(__file__))
 THEME = '.'
-ENV = Environment(autoescape=True, trim_blocks=True, lstrip_blocks=True,
-    loader=FileSystemLoader(['.', os.path.join(DIR, THEME)]),
-    extensions=['jinja2.ext.autoescape'])
+OVERRIDES = {'syntax_highlight': 'short', 'math_output': 'MathML'}
 
 def application(env, start_response):
     resp_code, doc = handle(env)
@@ -80,8 +78,7 @@ def html(root, fpath):
     return 'text/html', tmpl.render(d).encode('utf-8')
 
 def rst(root, fpath):
-    parts = publish_parts(source=open(fpath).read(), writer_name='html',
-        settings_overrides={'syntax_highlight': 'short', 'math_output': 'MathML', 'doctitle_xform':True})
+    parts = publish_parts(source=open(fpath).read(), writer_name='html', settings_overrides=OVERRIDES)
     return page2(root, parts['title'], parts['html_body'])
 
 def md(root, fpath):
@@ -184,4 +181,62 @@ def page2(root, title, body):
 def render(tmplname, **kwargs):
     tmpl = ENV.get_template(tmplname)
     return 'text/html', tmpl.render(kwargs).encode('utf-8')
+
+# --- Jinja2 extensions ---
+
+from jinja2 import nodes
+from jinja2.ext import Extension
+
+
+class Restructured(Extension):
+    '''add {% rst %}...{% endrst %} custom tag'''
+    tags = set(['rst'])
+
+    def __init__(self, environment):
+        super(Restructured, self).__init__(environment)
+
+    def parse(self, parser):
+        lineno = parser.stream.next().lineno
+        body = parser.parse_statements(['name:endrst'], drop_needle=True)
+        return nodes.CallBlock(self.call_method('_render'), [], [], body).set_lineno(lineno)
+
+    def _render(self, caller):
+        parts = publish_parts(caller(), writer_name='html', settings_overrides=OVERRIDES)
+        return parts['html_body']
+
+
+class Textile(Extension):
+    '''add {% txtl %}...{% endtxtl %} custom tag'''
+    tags = set(['txtl'])
+
+    def __init__(self, environment):
+        super(Textile, self).__init__(environment)
+
+    def parse(self, parser):
+        lineno = parser.stream.next().lineno
+        body = parser.parse_statements(['name:endtxtl'], drop_needle=True)
+        return nodes.CallBlock(self.call_method('_render'), [], [], body).set_lineno(lineno)
+
+    def _render(self, caller):
+        return textile(caller().encode('utf-8'), html_type='html', auto_link=True, encoding='utf-8')
+
+
+class Markdown(Extension):
+    '''add {% md %}...{% endmd %} custom tag'''
+    tags = set(['md'])
+
+    def __init__(self, environment):
+        super(Markdown, self).__init__(environment)
+
+    def parse(self, parser):
+        lineno = parser.stream.next().lineno
+        body = parser.parse_statements(['name:endmd'], drop_needle=True)
+        return nodes.CallBlock(self.call_method('_render'), [], [], body).set_lineno(lineno)
+
+    def _render(self, caller):
+        return markdown(caller())
+
+ENV = Environment(autoescape=True, trim_blocks=True, lstrip_blocks=True,
+    loader=FileSystemLoader(['.', os.path.join(DIR, THEME)]),
+    extensions=['jinja2.ext.autoescape', Restructured, Textile, Markdown])
 

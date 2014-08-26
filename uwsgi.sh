@@ -19,6 +19,6 @@ uwsgi --http-socket "$SOCKET" --chdir2 "$SRVDIR" \
   --route '\.png$ cache:key=${REQUEST_URI},name=cache1,content_type=image/png' \
   --route '.* cache:key=${REQUEST_URI},name=cache1,content_type=text/html' \
   --route '.* cachestore:key=${REQUEST_URI},name=cache1,expires='"$EXPIRES" \
-  --log-format '%(ctime) %(status) %(msecs) %(size) %(method) %(uri)' \
+  --log-format '%(status) %(msecs) %(method) %(uri)' \
   "$@"
 

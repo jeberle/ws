@@ -17,7 +17,7 @@ import yaml
 DIR = os.path.dirname(os.path.abspath(__file__))
 THEME = '.'
 ENV = Environment(autoescape=True, trim_blocks=True, lstrip_blocks=True,
-    loader=FileSystemLoader(os.path.join(DIR, THEME)),
+    loader=FileSystemLoader(['.', os.path.join(DIR, THEME)]),
     extensions=['jinja2.ext.autoescape'])
 
 def application(env, start_response):
@@ -69,10 +69,14 @@ def txt(root, fpath):
     buf = unicode(open(fpath).read(), encoding='utf-8')
     return page(root, fpath, u'<pre>%s</pre>' % cgi.escape(buf))
 
-def yml(root, fpath):
+def html(root, fpath):
     buf = unicode(open(fpath).read(), encoding='utf-8')
-    d = yaml.load(buf)
-    tmpl = ENV.get_template(fpath.replace('.yml', '.html'))
+    yml = fpath.replace('.html', '.yml')
+    if os.path.isfile(yml):
+        buf = unicode(open(yml).read(), encoding='utf-8')
+        d = yaml.load(buf)
+    d['root'], d['year'] = root, 2014
+    tmpl = ENV.get_template(fpath)
     return 'text/html', tmpl.render(d).encode('utf-8')
 
 def rst(root, fpath):
@@ -154,19 +158,20 @@ EXT_MAP = {
     '.md': md,
     '.txtl': txtl,
     '.textile': txtl,
+    '.html': html,
     '.css': cat('text/css'),
     '.js': cat('text/javascript'),
-    '.html': cat('text/html'),
     '.xml': cat('text/xml'),
     '.gif': cat('image/gif'),
     '.png': cat('image/png'),
     '.jpg': cat('image/jpeg'),
+    '.svg': cat('image/svg+xml'),
     '.json': highlight(pygments.lexers.JavascriptLexer()),
     '.sh': highlight(pygments.lexers.BashLexer()),
     '.pl': highlight(pygments.lexers.PerlLexer()),
     '.py': highlight(pygments.lexers.PythonLexer()),
     '.vim': highlight(pygments.lexers.VimLexer()),
-    '.yml': yml,
+    '.yml': highlight(pygments.lexers.YamlLexer()),
 }
 FORMATTER = pygments.formatters.HtmlFormatter(linenos=False, style='vs')
 

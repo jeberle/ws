@@ -31,7 +31,7 @@ def handle(env):
     root, method, uri = env['SCRIPT_NAME'], env['REQUEST_METHOD'], env['REQUEST_URI']
     if method != 'GET':
         return '501 Not Implemented', page(root, 'Not Implemented', '')
-    fpath = resolve(uri)
+    fpath = resolve(root, uri)
     if os.path.isdir(fpath):
         return '200 OK', listdir(root, fpath)
     if os.path.isfile(fpath):
@@ -39,11 +39,11 @@ def handle(env):
     else:
         return '404 Not Found', page(root, 'File not found', '')
 
-def resolve(uri):
-    '''resolve URI -> fpath, w/ special case for "/static" stem'''
+def resolve(root, uri):
+    '''resolve URI -> fpath, w/ special case for "<root>/ws" stem'''
     fpath = urllib.unquote_plus(uri)
-    if fpath.startswith('/static/'):
-        fpath = os.path.normpath(fpath.replace('/static', os.path.join(DIR, THEME)))
+    if fpath.startswith('%s/ws/' % root):
+        fpath = os.path.normpath(fpath.replace('%s/ws' % root, os.path.join(DIR, THEME)))
         if fpath == DIR:
             fpath = '.'
     elif fpath == '/':
@@ -70,7 +70,7 @@ def txt(root, fpath):
 def html(root, fpath):
     buf = unicode(open(fpath).read(), encoding='utf-8')
     yml = fpath.replace('.html', '.yml')
-    d = {'root': root, 'year': 2014}
+    d = {'root': root, 'ws': '%s/ws' % root, 'year': 2014}
     if os.path.isfile(yml):
         buf = unicode(open(yml).read(), encoding='utf-8')
         d.update(yaml.load(buf))
@@ -102,7 +102,7 @@ def cat(ctype):
 # --- directories ---
 
 def listdir(root, fpath):
-    return render('dirlist.html', root=root, title=fpath, rows=rows(root, fpath))
+    return render('dirlist.html', root, fpath, rows=rows(root, fpath))
 
 def rows(root, fpath):
     names = [ n for n in os.listdir(fpath) if not n.startswith('.') ]
@@ -122,7 +122,7 @@ def cmp_name(a, b):
 
 def marks(root, fpath):
     title, sections = load_marks(fpath)
-    return render('marks.html', root=root, title=title, sections=sections)
+    return render('marks.html', root, title, sections=sections)
 
 def load_marks(fpath):
     f = open(fpath)
@@ -173,14 +173,16 @@ EXT_MAP = {
 FORMATTER = pygments.formatters.HtmlFormatter(linenos=False, style='vs')
 
 def page(root, title, body):
-    return render('page.html', root=root, title=title, h1=title, body=body)
+    return render('page.html', root, title, body=body, h1=title)
 
 def page2(root, title, body):
-    return render('page.html', root=root, title=title, body=body)
+    return render('page.html', root, title, body=body)
 
-def render(tmplname, **kwargs):
+def render(tmplname, root, title, **kwargs):
     tmpl = ENV.get_template(tmplname)
-    return 'text/html', tmpl.render(kwargs).encode('utf-8')
+    d = { 'root': root, 'title': title, 'ws': '%s/ws' % root, 'year': 2014 }
+    d.update(kwargs)
+    return 'text/html', tmpl.render(d).encode('utf-8')
 
 # --- Jinja2 extensions ---
 

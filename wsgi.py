@@ -257,6 +257,6 @@ class Pygments(Extension):
 
 
 ENV = Environment(autoescape=True, trim_blocks=True, lstrip_blocks=True,
-    loader=FileSystemLoader(['.', os.path.join(DIR, THEME)]),
+    loader=FileSystemLoader(['.', 'templates', os.path.join(DIR, THEME)]),
     extensions=['jinja2.ext.autoescape', Restructured, Textile, Markdown, Pygments])
 

@@ -7,20 +7,9 @@ from jinja2.ext import Extension
 
 FORMATTER = pygments.formatters.HtmlFormatter(linenos=False, style='vs')
 
-def highlight(lexer):
-    def f(fpath):
-        return '', pygments.highlight(open(fpath).read(), lexer, FORMATTER)
-    return f
-
-EXT_MAP = {
-    '.json': highlight(pygments.lexers.JavascriptLexer()),
-    '.sh': highlight(pygments.lexers.BashLexer()),
-    '.pl': highlight(pygments.lexers.PerlLexer()),
-    '.py': highlight(pygments.lexers.PythonLexer()),
-    '.sql': highlight(pygments.lexers.SqlLexer()),
-    '.vim': highlight(pygments.lexers.VimLexer()),
-    '.yml': highlight(pygments.lexers.YamlLexer()),
-}
+def highlight(fpath):
+    lexer = pygments.lexers.get_lexer_for_filename(fpath)
+    return '', pygments.highlight(open(fpath).read(), lexer, FORMATTER)
 
 class Pygments(Extension):
     '''add {% code 'lexer-alias' %}...{% endcode %} custom tag'''

@@ -6,8 +6,6 @@ from jinja2.ext import Extension
 def txtl(fpath):
     return '', textile(open(fpath).read(), html_type='html', auto_link=True, encoding='utf-8')
 
-EXT_MAP = {'.txtl': txtl, '.textile': txtl}
-
 class Textile(Extension):
     '''add {% txtl %}...{% endtxtl %} custom tag'''
     tags = set(['txtl'])

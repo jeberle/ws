@@ -6,8 +6,6 @@ from jinja2.ext import Extension
 def md(fpath):
     return '', markdown(open(fpath).read())
 
-EXT_MAP = {'.md': md}
-
 class Markdown(Extension):
     '''add {% md %}...{% endmd %} custom tag'''
     tags = set(['md'])

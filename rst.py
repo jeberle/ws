@@ -9,8 +9,6 @@ def rst(fpath):
     parts = publish_parts(source=open(fpath).read(), writer_name='html', settings_overrides=OVERRIDES)
     return parts['title'], parts['html_body']
 
-EXT_MAP = {'.rst': rst, '.rest': rst}
-
 class Restructured(Extension):
     '''add {% rst %}...{% endrst %} custom tag'''
     tags = set(['rst'])

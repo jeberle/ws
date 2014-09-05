@@ -4,18 +4,27 @@ import os.path
 import cgi
 import yaml
 
-from code import EXT_MAP as map1
-from md import EXT_MAP as map2
-from rst import EXT_MAP as map3
-from txtl import EXT_MAP as map4
+from code import highlight
+from md import md
+from rst import rst
+from txtl import txtl
 from tmpl import render
 from marks import marks
 
-EXT_MAP = {}
-EXT_MAP.update(map1)
-EXT_MAP.update(map2)
-EXT_MAP.update(map3)
-EXT_MAP.update(map4)
+EXT_MAP = {
+    '.json': highlight,
+    '.sh': highlight,
+    '.pl': highlight,
+    '.py': highlight,
+    '.sql': highlight,
+    '.vim': highlight,
+    '.yml': highlight,
+    '.md': md,
+    '.rst': rst,
+    '.rest': rst,
+    '.txtl': txtl,
+    '.textile': txtl,
+}
 
 def showfile(root, fpath):
     # special case if file is in 'marks' dir

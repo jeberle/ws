@@ -1,3 +1,4 @@
+'''Define Jinja2 environment & render method'''
 
 import os.path
 from jinja2 import Environment, FileSystemLoader
@@ -19,5 +20,4 @@ def render(fpath, root, title, **kwargs):
     d.update(kwargs)
     tmpl = ENV.get_template(fpath)
     return tmpl.render(d).encode('utf-8')
-
 

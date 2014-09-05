@@ -1,7 +1,7 @@
 '''Render Pygments, reStructuredText, and Markdown via a minimal WSGI application.'''
 
-import sys
 import os.path
+import sys
 import urllib
 
 # since we cd normally, put file dir at head of path

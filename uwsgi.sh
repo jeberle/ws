@@ -16,7 +16,12 @@ uwsgi --http-socket "$SOCKET" --chdir2 "$SRVDIR" \
   --plugin router_cache \
   --cache2 'name=cache1,items=100' \
   --route '\.css$ cache:key=${REQUEST_URI},name=cache1,content_type=text/css' \
+  --route '\.xml$ cache:key=${REQUEST_URI},name=cache1,content_type=text/xml' \
+  --route '\.gif$ cache:key=${REQUEST_URI},name=cache1,content_type=image/gif' \
   --route '\.png$ cache:key=${REQUEST_URI},name=cache1,content_type=image/png' \
+  --route '\.jpg$ cache:key=${REQUEST_URI},name=cache1,content_type=image/jpeg' \
+  --route '\.svg$ cache:key=${REQUEST_URI},name=cache1,content_type=image/svg+xml' \
+  --route '\.js$ cache:key=${REQUEST_URI},name=cache1,content_type=application/x-javascript' \
   --route '.* cache:key=${REQUEST_URI},name=cache1,content_type=text/html' \
   --route '.* cachestore:key=${REQUEST_URI},name=cache1,expires='"$EXPIRES" \
   --log-format '%(status) %(msecs) %(method) %(uri)' \

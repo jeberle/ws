@@ -4,3 +4,4 @@ Pygments==1.6
 textile==2.1.8
 PyYAML==3.11
 Jinja2==2.7.1
+mdx-smartypants==1.5.1

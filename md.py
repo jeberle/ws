@@ -4,7 +4,7 @@ from jinja2 import nodes
 from jinja2.ext import Extension
 
 def md(fpath):
-    return '', markdown(open(fpath).read())
+    return '', markdown(open(fpath).read(), extensions=['smartypants'])
 
 class Markdown(Extension):
     '''add {% md %}...{% endmd %} custom tag'''
@@ -19,5 +19,5 @@ class Markdown(Extension):
         return nodes.CallBlock(self.call_method('_render'), [], [], body).set_lineno(lineno)
 
     def _render(self, caller):
-        return markdown(caller())
+        return markdown(caller(), extensions=['smartypants'])
 

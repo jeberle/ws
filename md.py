@@ -19,5 +19,5 @@ class Markdown(Extension):
         return nodes.CallBlock(self.call_method('_render'), [], [], body).set_lineno(lineno)
 
     def _render(self, caller):
-        return markdown(caller(), extensions=['smartypants'])
+        return markdown(caller(), extensions=['smartypants(entities=unicode)'])
 

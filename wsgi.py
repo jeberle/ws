@@ -4,6 +4,7 @@ import os.path
 import cgi
 import sys
 import urllib
+from glob import glob
 
 # since we cd normally, put file dir at head of path
 DIR = os.path.dirname(os.path.abspath(__file__))
@@ -38,13 +39,18 @@ def handle(env):
         if method != 'GET':
             return '501 Not Implemented', 'text/html; charset=utf-8', error(root, 'Not Implemented')
         fpath = resolve(root, uri)
+        if os.path.isdir(fpath):
+            # check for index.* w/in dir
+            ls = glob(os.path.join(fpath, 'index.*'))
+            if len(ls) == 1:
+                fpath = ls[0]
+            else:
+                return '200 OK', 'text/html; charset=utf-8', dirlist(root, fpath)
         ext = '.' + fpath.rsplit('.', 1)[1] if '.' in fpath else ''
         if ext in EXT_MAP and os.path.isfile(fpath):
             return '200 OK', EXT_MAP[ext], open(fpath).read()
         if os.path.isfile(fpath):
             return '200 OK', 'text/html; charset=utf-8', showfile(root, fpath)
-        if os.path.isdir(fpath):
-            return '200 OK', 'text/html; charset=utf-8', dirlist(root, fpath)
         else:
             return '404 Not Found', 'text/html; charset=utf-8', error(root, 'File not found')
     except Exception as ex:

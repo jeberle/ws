@@ -9,7 +9,7 @@ FORMATTER = pygments.formatters.HtmlFormatter(linenos=False, style='vs')
 
 def highlight(fpath):
     lexer = pygments.lexers.get_lexer_for_filename(fpath)
-    return '', pygments.highlight(open(fpath).read(), lexer, FORMATTER)
+    return '', pygments.highlight(unicode(open(fpath).read(), encoding='utf-8'), lexer, FORMATTER)
 
 class Pygments(Extension):
     '''add {% code 'lexer-alias' %}...{% endcode %} custom tag'''
@@ -25,5 +25,5 @@ class Pygments(Extension):
         return nodes.CallBlock(self.call_method('_render', [alias]), [], [], body).set_lineno(lineno)
 
     def _render(self, alias, caller):
-        return pygments.highlight(caller().encode('utf-8'), pygments.lexers.get_lexer_by_name(alias), FORMATTER)
+        return pygments.highlight(caller(), pygments.lexers.get_lexer_by_name(alias), FORMATTER)
 

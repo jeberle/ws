@@ -27,6 +27,8 @@ EXT_MAP = {
 
 def showfile(root, fpath):
     ext = '.' + fpath.rsplit('.', 1)[1] if '.' in fpath else ''
+    if ext == '.html':
+        return render(fpath, root)
     # attempt to render requested template in .yml file
     if ext == '.yml':
         d = yaml.load(unicode(open(fpath).read(), encoding='utf-8'))

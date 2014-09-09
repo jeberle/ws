@@ -33,16 +33,16 @@ def showfile(root, fpath):
         if os.path.isfile(yml):
             buf = unicode(open(yml).read(), encoding='utf-8')
             d = yaml.load(buf)
-        return render(fpath, root, '', **d)
+        return render(fpath, root, **d)
     # reality resumes, render file based on file ext
     if ext in EXT_MAP:
         title, body = EXT_MAP[ext](fpath)
         title = title if title else fpath
         h1 = title if title else ''
-        return render('page.html', root, title, body=body, h1=h1)
+        return render('page.html', root, title=title, body=body, h1=h1)
     # just try for text as <pre> block
     else:
         buf = unicode(open(fpath).read(), encoding='utf-8')
         body = u'<pre>%s</pre>' % cgi.escape(buf)
-        return render('page.html', root, fpath, body=body)
+        return render('page.html', root, title=fpath, body=body)
 

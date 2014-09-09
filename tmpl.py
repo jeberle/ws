@@ -15,8 +15,8 @@ ENV = Environment(autoescape=True, trim_blocks=True, lstrip_blocks=True,
     loader=FileSystemLoader(['.', 'templates', os.path.join(DIR, THEME)]),
     extensions=['jinja2.ext.autoescape', Pygments, Markdown, Restructured, Textile])
 
-def render(fpath, root, title, **kwargs):
-    d = {'root': root, 'ws': '%s/ws' % root, 'title': title, 'year': 2014}
+def render(fpath, root, **kwargs):
+    d = {'root': root, 'ws': '%s/ws' % root, 'year': 2014}
     d.update(kwargs)
     tmpl = ENV.get_template(fpath)
     return tmpl.render(d).encode('utf-8')

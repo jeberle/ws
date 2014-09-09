@@ -6,7 +6,7 @@ import urllib
 from tmpl import render
 
 def dirlist(root, fpath):
-    return render('dirlist.html', root, fpath, rows=rows(root, fpath))
+    return render('dirlist.html', root, title=fpath, rows=rows(root, fpath))
 
 def rows(root, fpath):
     names = [ n for n in os.listdir(fpath) if not n.startswith('.') ]

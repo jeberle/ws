@@ -30,7 +30,7 @@ def test_txtl():
     assert body == unicode(open('files/txtl.html').read(), encoding='utf-8').rstrip()
 
 def test_tmpl():
-    body = render('files/tmpl.html', 'root', 'Title', year=2014)
+    body = render('files/tmpl.html', root, title='Title', year=2014)
     open('files/last.html', 'w').write(body)
     assert body == open('files/rendered.html').read()
 

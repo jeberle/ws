@@ -1,1 +1,1 @@
-Render Pygments, reStructuredText, Markdown, Textile, & bookmarks as a minimal WSGI application.
+Render Markdown, reStructuredText,  Textile, & Pygments as a minimal WSGI application.

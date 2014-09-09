@@ -9,7 +9,6 @@ from md import md
 from rst import rst
 from txtl import txtl
 from tmpl import render
-from marks import marks
 
 EXT_MAP = {
     '.json': highlight,
@@ -27,9 +26,6 @@ EXT_MAP = {
 }
 
 def showfile(root, fpath):
-    # special case if file is in 'marks' dir
-    if os.path.basename(os.path.dirname(os.path.abspath(fpath))) == 'marks':
-        return marks(root, fpath)
     ext = '.' + fpath.rsplit('.', 1)[1] if '.' in fpath else ''
     # attempt to load corresponding .yml file if .html
     if ext == '.html':

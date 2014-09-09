@@ -14,13 +14,13 @@ from tmpl import render
 
 THEME = '.'
 EXT_MAP = {
-    '.css': 'text/css',
-    '.xml': 'text/xml',
+    '.css': 'text/css; charset=utf-8',
+    '.xml': 'text/xml; charset=utf-8',
     '.gif': 'image/gif',
     '.png': 'image/png',
     '.jpg': 'image/jpeg',
-    '.svg': 'image/svg+xml',
-    '.js': 'application/x-javascript',
+    '.svg': 'image/svg+xml; charset=utf-8',
+    '.js': 'application/x-javascript; charset=utf-8',
 }
 
 def application(env, start_response):
@@ -34,17 +34,17 @@ def application(env, start_response):
 def handle(env):
     root, method, uri = env['SCRIPT_NAME'], env['REQUEST_METHOD'], env['REQUEST_URI']
     if method != 'GET':
-        return '501 Not Implemented', 'text/html', error(root, 'Not Implemented')
+        return '501 Not Implemented', 'text/html; charset=utf-8', error(root, 'Not Implemented')
     fpath = resolve(root, uri)
     ext = '.' + fpath.rsplit('.', 1)[1] if '.' in fpath else ''
     if ext in EXT_MAP and os.path.isfile(fpath):
         return '200 OK', EXT_MAP[ext], open(fpath).read()
     if os.path.isfile(fpath):
-        return '200 OK', 'text/html', showfile(root, fpath)
+        return '200 OK', 'text/html; charset=utf-8', showfile(root, fpath)
     if os.path.isdir(fpath):
-        return '200 OK', 'text/html', dirlist(root, fpath)
+        return '200 OK', 'text/html; charset=utf-8', dirlist(root, fpath)
     else:
-        return '404 Not Found', 'text/html', error(root, 'File not found')
+        return '404 Not Found', 'text/html; charset=utf-8', error(root, 'File not found')
 
 def resolve(root, uri):
     '''resolve URI -> fpath, w/ special case for "<root>/ws" stem'''

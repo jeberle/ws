@@ -27,8 +27,13 @@ EXT_MAP = {
 
 def showfile(root, fpath):
     ext = '.' + fpath.rsplit('.', 1)[1] if '.' in fpath else ''
+    # attempt to load corresponding .yml file if .html
     if ext == '.html':
-        return render(fpath, root)
+        yml, d = fpath.replace('.html', '.yml'), {}
+        if os.path.isfile(yml):
+            buf = unicode(open(yml).read(), encoding='utf-8')
+            d = yaml.load(buf)
+        return render(fpath, root, **d)
     # attempt to render requested template in .yml file
     if ext == '.yml':
         d = yaml.load(unicode(open(fpath).read(), encoding='utf-8'))

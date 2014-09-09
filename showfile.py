@@ -30,7 +30,7 @@ def showfile(root, fpath):
     # attempt to render requested template in .yml file
     if ext == '.yml':
         d = yaml.load(unicode(open(fpath).read(), encoding='utf-8'))
-        if 'template' in d and 'title' in d:
+        if 'template' in d:
             return render(d['template'], root, **d)
     # render file based on file ext
     if ext in EXT_MAP:

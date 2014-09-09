@@ -46,6 +46,11 @@ def handle(env):
                 fpath = ls[0]
             else:
                 return '200 OK', 'text/html; charset=utf-8', dirlist(root, fpath)
+        elif not os.path.exists(fpath):
+            # try to resolve file like Apache MultiViews: /foo -> /foo.html
+            ls = glob(fpath + '.*')
+            if len(ls) == 1:
+                fpath = ls[0]
         ext = '.' + fpath.rsplit('.', 1)[1] if '.' in fpath else ''
         if ext in EXT_MAP and os.path.isfile(fpath):
             return '200 OK', EXT_MAP[ext], open(fpath).read()

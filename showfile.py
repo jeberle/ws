@@ -39,6 +39,10 @@ def showfile(root, fpath):
         d = yaml.load(unicode(open(fpath).read(), encoding='utf-8'))
         if 'template' in d:
             return render(d['template'], root, **d)
+    # check if file starts w/ a template tag (for templating non-html files)
+    magic = open(fpath).read(2)
+    if magic == '{%':
+        return render(fpath, root)
     # render file based on file ext
     if ext in EXT_MAP:
         title, body = EXT_MAP[ext](fpath)

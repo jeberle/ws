@@ -60,5 +60,5 @@ def resolve(root, uri):
     return fpath
 
 def error(root, err):
-    return render('page.html', root=root, title=err, h1=err)
+    return render('page.html', root, title=err, h1=err)
 

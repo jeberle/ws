@@ -1,3 +1,4 @@
+import pygments.lexers
 
 from code import highlight
 from md import md
@@ -6,9 +7,10 @@ from txtl import txtl
 from tmpl import render
 
 def test_code():
-    title, body = highlight('files/code.py')
+    fpath = 'files/code.py'
+    lexer = pygments.lexers.get_lexer_for_filename(fpath)
+    body = highlight(lexer, fpath)
     open('files/last.html', 'w').write(body.encode('utf-8'))
-    assert title == ''
     assert body == unicode(open('files/code.html').read(), encoding='utf-8')
 
 def test_md():
@@ -30,7 +32,7 @@ def test_txtl():
     assert body == unicode(open('files/txtl.html').read(), encoding='utf-8').rstrip()
 
 def test_tmpl():
-    body = render('files/tmpl.html', root, title='Title', year=2014)
+    body = render('files/tmpl.html', 'root', title='Title', year=2014)
     open('files/last.html', 'w').write(body)
-    assert body == open('files/rendered.html').read()
+    assert body.rstrip() == open('files/rendered.html').read().rstrip()
 

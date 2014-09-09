@@ -7,9 +7,8 @@ from jinja2.ext import Extension
 
 FORMATTER = pygments.formatters.HtmlFormatter(linenos=False, style='vs')
 
-def highlight(fpath):
-    lexer = pygments.lexers.get_lexer_for_filename(fpath)
-    return '', pygments.highlight(unicode(open(fpath).read(), encoding='utf-8'), lexer, FORMATTER)
+def highlight(lexer, fpath):
+    return pygments.highlight(unicode(open(fpath).read(), encoding='utf-8'), lexer, FORMATTER)
 
 class Pygments(Extension):
     '''add {% code 'lexer-alias' %}...{% endcode %} custom tag'''

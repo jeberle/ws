@@ -3,6 +3,7 @@
 import os.path
 import cgi
 import yaml
+import pygments.lexers
 
 from code import highlight
 from md import md
@@ -11,13 +12,6 @@ from txtl import txtl
 from tmpl import render
 
 EXT_MAP = {
-    '.json': highlight,
-    '.sh': highlight,
-    '.pl': highlight,
-    '.py': highlight,
-    '.sql': highlight,
-    '.vim': highlight,
-    '.yml': highlight,
     '.md': md,
     '.rst': rst,
     '.rest': rst,
@@ -49,8 +43,12 @@ def showfile(root, fpath):
         title = title if title else fpath
         h1 = title if title else ''
         return render('page.html', root, title=title, body=body, h1=h1)
-    # just try for text as <pre> block
-    else:
+    try:
+        lexer = pygments.lexers.get_lexer_for_filename(fpath)
+        body = highlight(lexer, fpath)
+        return render('page.html', root, title=fpath, body=body)
+    except:
+        # just try for text as <pre> block
         buf = unicode(open(fpath).read(), encoding='utf-8')
         body = u'<pre>%s</pre>' % cgi.escape(buf)
         return render('page.html', root, title=fpath, body=body)

@@ -1,6 +1,7 @@
 '''Render Pygments, reStructuredText, and Markdown via a minimal WSGI application.'''
 
 import os.path
+import cgi
 import sys
 import urllib
 
@@ -32,19 +33,22 @@ def application(env, start_response):
     return [content]
 
 def handle(env):
-    root, method, uri = env['SCRIPT_NAME'], env['REQUEST_METHOD'], env['REQUEST_URI']
-    if method != 'GET':
-        return '501 Not Implemented', 'text/html; charset=utf-8', error(root, 'Not Implemented')
-    fpath = resolve(root, uri)
-    ext = '.' + fpath.rsplit('.', 1)[1] if '.' in fpath else ''
-    if ext in EXT_MAP and os.path.isfile(fpath):
-        return '200 OK', EXT_MAP[ext], open(fpath).read()
-    if os.path.isfile(fpath):
-        return '200 OK', 'text/html; charset=utf-8', showfile(root, fpath)
-    if os.path.isdir(fpath):
-        return '200 OK', 'text/html; charset=utf-8', dirlist(root, fpath)
-    else:
-        return '404 Not Found', 'text/html; charset=utf-8', error(root, 'File not found')
+    try:
+        root, method, uri = env['SCRIPT_NAME'], env['REQUEST_METHOD'], env['REQUEST_URI']
+        if method != 'GET':
+            return '501 Not Implemented', 'text/html; charset=utf-8', error(root, 'Not Implemented')
+        fpath = resolve(root, uri)
+        ext = '.' + fpath.rsplit('.', 1)[1] if '.' in fpath else ''
+        if ext in EXT_MAP and os.path.isfile(fpath):
+            return '200 OK', EXT_MAP[ext], open(fpath).read()
+        if os.path.isfile(fpath):
+            return '200 OK', 'text/html; charset=utf-8', showfile(root, fpath)
+        if os.path.isdir(fpath):
+            return '200 OK', 'text/html; charset=utf-8', dirlist(root, fpath)
+        else:
+            return '404 Not Found', 'text/html; charset=utf-8', error(root, 'File not found')
+    except Exception as ex:
+        return '500 Error', 'text/html; charset=utf-8', error(root, '%s: %s' % (type(ex), ex))
 
 def resolve(root, uri):
     '''resolve URI -> fpath, w/ special case for "<root>/ws" stem'''
@@ -60,5 +64,6 @@ def resolve(root, uri):
     return fpath
 
 def error(root, err):
-    return render('page.html', root, title=err, h1=err)
+    body = u'<pre>%s</pre>' % cgi.escape(err)
+    return render('page.html', root, title='Error', body=body)
 

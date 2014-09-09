@@ -27,14 +27,12 @@ EXT_MAP = {
 
 def showfile(root, fpath):
     ext = '.' + fpath.rsplit('.', 1)[1] if '.' in fpath else ''
-    # attempt to load corresponding .yml file if .html
-    if ext == '.html':
-        yml, d = fpath.replace('.html', '.yml'), {}
-        if os.path.isfile(yml):
-            buf = unicode(open(yml).read(), encoding='utf-8')
-            d = yaml.load(buf)
-        return render(fpath, root, **d)
-    # reality resumes, render file based on file ext
+    # attempt to render requested template in .yml file
+    if ext == '.yml':
+        d = yaml.load(unicode(open(fpath).read(), encoding='utf-8'))
+        if 'template' in d and 'title' in d:
+            return render(d['template'], root, **d)
+    # render file based on file ext
     if ext in EXT_MAP:
         title, body = EXT_MAP[ext](fpath)
         title = title if title else fpath

@@ -12,7 +12,7 @@ sys.path.insert(0, DIR)
 
 from dirlist import dirlist
 from showfile import showfile
-from tmpl import render
+from tmpl import render_sys
 
 EXT_MAP = {
     '.css': 'text/css; charset=utf-8',
@@ -75,5 +75,5 @@ def resolve(root, uri):
 
 def error(root, err):
     body = u'<pre>%s</pre>' % cgi.escape(err)
-    return render('page.html', root, title='Error', body=body)
+    return render_sys('page.html', root, title='Error', body=body)
 

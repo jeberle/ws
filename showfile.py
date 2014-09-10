@@ -9,7 +9,7 @@ from code import highlight
 from md import md
 from rst import rst
 from txtl import txtl
-from tmpl import render
+from tmpl import render_ext, render_sys
 
 EXT_MAP = {
     '.md': md,
@@ -27,29 +27,29 @@ def showfile(root, fpath):
         if os.path.isfile(yml):
             buf = unicode(open(yml).read(), encoding='utf-8')
             d = yaml.load(buf)
-        return render(fpath, root, **d)
+        return render_ext(fpath, root, **d)
     # attempt to render requested template in .yml file
     if ext == '.yml':
         d = yaml.load(unicode(open(fpath).read(), encoding='utf-8'))
         if 'template' in d:
-            return render(d['template'], root, **d)
+            return render_ext(d['template'], root, **d)
     # check if file starts w/ a template tag (for templating non-html files)
     magic = open(fpath).read(2)
     if magic == '{%':
-        return render(fpath, root)
+        return render_ext(fpath, root)
     # render file based on file ext
     if ext in EXT_MAP:
         title, body = EXT_MAP[ext](fpath)
         title = title if title else fpath
         h1 = title if title else ''
-        return render('page.html', root, title=title, body=body, h1=h1)
+        return render_sys('page.html', root, title=title, body=body, h1=h1)
     try:
         lexer = pygments.lexers.get_lexer_for_filename(fpath)
         body = highlight(lexer, fpath)
-        return render('page.html', root, title=fpath, body=body)
+        return render_sys('page.html', root, title=fpath, body=body)
     except:
         # just try for text as <pre> block
         buf = unicode(open(fpath).read(), encoding='utf-8')
         body = u'<pre>%s</pre>' % cgi.escape(buf)
-        return render('page.html', root, title=fpath, body=body)
+        return render_sys('page.html', root, title=fpath, body=body)
 

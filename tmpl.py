@@ -10,13 +10,27 @@ from txtl import Textile
 
 DIR = os.path.dirname(os.path.abspath(__file__))
 
-ENV = Environment(autoescape=True, trim_blocks=True, lstrip_blocks=True,
-    loader=FileSystemLoader(['.', 'templates', DIR]),
-    extensions=['jinja2.ext.autoescape', Pygments, Markdown, Restructured, Textile])
+# system templates
 
-def render(fpath, root, **kwargs):
+SYS_ENV = Environment(autoescape=True, trim_blocks=True, lstrip_blocks=True,
+    loader=FileSystemLoader([DIR]),
+    extensions=['jinja2.ext.autoescape'])
+
+def render_sys(fpath, root, **kwargs):
     d = {'root': root, 'ws': '%s/ws' % root, 'year': 2014}
     d.update(kwargs)
-    tmpl = ENV.get_template(fpath)
+    tmpl = SYS_ENV.get_template(fpath)
+    return tmpl.render(d).encode('utf-8')
+
+# external templates
+
+EXT_ENV = Environment(autoescape=True, trim_blocks=True, lstrip_blocks=True,
+    loader=FileSystemLoader(['.', 'templates']),
+    extensions=['jinja2.ext.autoescape', Pygments, Markdown, Restructured, Textile])
+
+def render_ext(fpath, root, **kwargs):
+    d = {'root': root, 'year': 2014}
+    d.update(kwargs)
+    tmpl = EXT_ENV.get_template(fpath)
     return tmpl.render(d).encode('utf-8')
 

@@ -3,10 +3,10 @@
 import os.path
 import urllib
 
-from tmpl import render
+from tmpl import render_sys
 
 def dirlist(root, fpath):
-    return render('dirlist.html', root, title=fpath, rows=rows(root, fpath))
+    return render_sys('dirlist.html', root, title=fpath, rows=rows(root, fpath))
 
 def rows(root, fpath):
     names = [ n for n in os.listdir(fpath) if not n.startswith('.') ]

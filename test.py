@@ -4,7 +4,7 @@ from code import highlight
 from md import md
 from rst import rst
 from txtl import txtl
-from tmpl import render
+from tmpl import render_sys
 
 def test_code():
     fpath = 'files/code.py'
@@ -32,7 +32,7 @@ def test_txtl():
     assert body == unicode(open('files/txtl.html').read(), encoding='utf-8').rstrip()
 
 def test_tmpl():
-    body = render('files/tmpl.html', 'root', title='Title', year=2014)
+    body = render_sys('files/tmpl.html', 'root', title='Title', year=2014)
     open('files/last.html', 'w').write(body)
     assert body.rstrip() == open('files/rendered.html').read().rstrip()
 

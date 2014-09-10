@@ -1,11 +1,11 @@
 
 body {
-  font-family: Helvetica, Arial, freesans, clean, sans-serif;
+  font-family: Arial, sans-serif;
   font-size: 13px;
   color: #111;
   width: 900px;
   margin: 20px;
-  line-height: 1.4;
+  line-height: 1.5;
 }
 
 li, dt, dd {
@@ -14,11 +14,11 @@ li, dt, dd {
 }
 
 h1 {
-  font-size: 24px;
+  font-size: 20px;
 }
 
 h2 {
-  font-size: 20px;
+  font-size: 16px;
 }
 
 h3, h4, h5, h6 {

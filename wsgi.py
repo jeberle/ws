@@ -3,6 +3,7 @@
 import os.path
 import cgi
 import sys
+import traceback
 import urllib
 from glob import glob
 
@@ -58,7 +59,7 @@ def handle(env):
         else:
             return '404 Not Found', 'text/html; charset=utf-8', error(root, 'File not found')
     except Exception as ex:
-        return '500 Error', 'text/html; charset=utf-8', error(root, '%s: %s' % (type(ex), ex))
+        return '500 Error', 'text/html; charset=utf-8', error(root, traceback.format_exc())
 
 def resolve(root, uri):
     '''resolve URI -> fpath, w/ special case for "<root>/ws" stem'''

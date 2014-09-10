@@ -18,6 +18,7 @@ from tmpl import render_sys
 EXT_MAP = {
     '.css': 'text/css; charset=utf-8',
     '.xml': 'text/xml; charset=utf-8',
+    '.vim': 'text/plain; charset=utf-8',
     '.gif': 'image/gif',
     '.png': 'image/png',
     '.jpg': 'image/jpeg',

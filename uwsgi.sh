@@ -17,6 +17,7 @@ uwsgi --http-socket "$SOCKET" --chdir2 "$SRVDIR" \
   --cache2 'name=cache1,items=100' \
   --route '\.css$ cache:key=${REQUEST_URI},name=cache1,content_type=text/css; charset=utf-8' \
   --route '\.xml$ cache:key=${REQUEST_URI},name=cache1,content_type=text/xml; charset=utf-8' \
+  --route '\.vim$ cache:key=${REQUEST_URI},name=cache1,content_type=text/plain; charset=utf-8' \
   --route '\.gif$ cache:key=${REQUEST_URI},name=cache1,content_type=image/gif' \
   --route '\.png$ cache:key=${REQUEST_URI},name=cache1,content_type=image/png' \
   --route '\.jpg$ cache:key=${REQUEST_URI},name=cache1,content_type=image/jpeg' \

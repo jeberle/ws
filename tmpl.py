@@ -9,10 +9,9 @@ from rst import Restructured
 from txtl import Textile
 
 DIR = os.path.dirname(os.path.abspath(__file__))
-THEME = '.'
 
 ENV = Environment(autoescape=True, trim_blocks=True, lstrip_blocks=True,
-    loader=FileSystemLoader(['.', 'templates', os.path.join(DIR, THEME)]),
+    loader=FileSystemLoader(['.', 'templates', DIR]),
     extensions=['jinja2.ext.autoescape', Pygments, Markdown, Restructured, Textile])
 
 def render(fpath, root, **kwargs):

@@ -14,7 +14,6 @@ from dirlist import dirlist
 from showfile import showfile
 from tmpl import render
 
-THEME = '.'
 EXT_MAP = {
     '.css': 'text/css; charset=utf-8',
     '.xml': 'text/xml; charset=utf-8',
@@ -65,7 +64,7 @@ def resolve(root, uri):
     '''resolve URI -> fpath, w/ special case for "<root>/ws" stem'''
     fpath = urllib.unquote_plus(uri)
     if fpath.startswith('%s/ws/' % root):
-        fpath = os.path.normpath(fpath.replace('%s/ws' % root, os.path.join(DIR, THEME)))
+        fpath = os.path.normpath(fpath.replace('%s/ws' % root, DIR))
         if fpath == DIR:
             fpath = '.'
     elif fpath == '/':

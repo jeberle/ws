@@ -1,6 +1,7 @@
 '''Define Jinja2 environment & render method'''
 
 import os.path
+from datetime import datetime
 from jinja2 import Environment, FileSystemLoader
 
 from code import Pygments
@@ -17,7 +18,7 @@ SYS_ENV = Environment(autoescape=True, trim_blocks=True, lstrip_blocks=True,
     extensions=['jinja2.ext.autoescape'])
 
 def render_sys(fpath, root, **kwargs):
-    d = {'root': root, 'ws': '%s/ws' % root, 'year': 2014}
+    d = {'root': root, 'ws': '%s/ws' % root, 'now': datetime.now()}
     d.update(kwargs)
     tmpl = SYS_ENV.get_template(fpath)
     return tmpl.render(d).encode('utf-8')
@@ -29,7 +30,7 @@ EXT_ENV = Environment(autoescape=True, trim_blocks=True, lstrip_blocks=True,
     extensions=['jinja2.ext.autoescape', Pygments, Markdown, Restructured, Textile])
 
 def render_ext(fpath, root, **kwargs):
-    d = {'root': root, 'year': 2014}
+    d = {'root': root, 'now': datetime.now()}
     d.update(kwargs)
     tmpl = EXT_ENV.get_template(fpath)
     return tmpl.render(d).encode('utf-8')

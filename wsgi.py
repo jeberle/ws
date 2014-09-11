@@ -44,15 +44,15 @@ def handle(env):
             return '200 OK', EXT_MAP[ext], open(fpath).read()
         if os.path.isdir(fpath):
             # check for index.* w/in dir
-            ls = glob(os.path.join(fpath, 'index.*'))
-            if len(ls) == 1:
+            ls = sorted(glob(os.path.join(fpath, 'index.*')))
+            if ls:
                 fpath = ls[0]
             else:
                 return '200 OK', 'text/html; charset=utf-8', dirlist(root, fpath)
         elif not os.path.exists(fpath):
             # try to resolve file like Apache MultiViews: /foo -> /foo.html
-            ls = glob(fpath + '.*')
-            if len(ls) == 1:
+            ls = sorted(glob(fpath + '.*'))
+            if ls:
                 fpath = ls[0]
         if os.path.isfile(fpath):
             ctype = 'text/%s; charset=utf-8' % ('xml' if fpath.endswith('.xml') else 'html')

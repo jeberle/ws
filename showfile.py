@@ -33,9 +33,9 @@ def showfile(root, fpath):
         d = yaml.load(unicode(open(fpath).read(), encoding='utf-8'))
         if 'template' in d:
             return render_ext(d['template'], root, **d)
-    # check if file starts w/ a template tag (for templating non-html files)
-    magic = open(fpath).read(2)
-    if magic == '{%':
+    # check if file contains template tags (for templating non-html files)
+    buf = open(fpath).read(1024)
+    if '{%' in buf or '{{' in buf:
         return render_ext(fpath, root)
     # render file based on file ext
     if ext in EXT_MAP:

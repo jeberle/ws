@@ -17,7 +17,6 @@ from tmpl import render_sys
 
 EXT_MAP = {
     '.css': 'text/css; charset=utf-8',
-    '.xml': 'text/xml; charset=utf-8',
     '.vim': 'text/plain; charset=utf-8',
     '.gif': 'image/gif',
     '.png': 'image/png',
@@ -56,7 +55,8 @@ def handle(env):
             if len(ls) == 1:
                 fpath = ls[0]
         if os.path.isfile(fpath):
-            return '200 OK', 'text/html; charset=utf-8', showfile(root, fpath)
+            ctype = 'text/%s; charset=utf-8' % ('xml' if fpath.endswith('.xml') else 'html')
+            return '200 OK', ctype, showfile(root, fpath)
         else:
             return '404 Not Found', 'text/html; charset=utf-8', error(root, 'File not found')
     except Exception as ex:

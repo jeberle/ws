@@ -4,7 +4,7 @@ from jinja2 import nodes
 from jinja2.ext import Extension
 
 def md(fpath):
-    return '', markdown(open(fpath).read(), extensions=['smartypants(entities=unicode)'])
+    return '', markdown(unicode(open(fpath).read(), encoding='utf-8'), extensions=['smartypants(entities=unicode)'])
 
 class Markdown(Extension):
     '''add {% md %}...{% endmd %} custom tag'''

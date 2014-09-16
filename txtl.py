@@ -4,7 +4,7 @@ from jinja2 import nodes
 from jinja2.ext import Extension
 
 def txtl(fpath):
-    return '', textile(open(fpath).read(), html_type='html', auto_link=True, encoding='utf-8')
+    return '', textile(unicode(open(fpath).read(), encoding='utf-8'), html_type='html', auto_link=True, encoding='utf-8')
 
 class Textile(Extension):
     '''add {% txtl 'nl2sp' %}...{% endtxtl %} custom tag'''

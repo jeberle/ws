@@ -6,7 +6,7 @@ from jinja2.ext import Extension
 OVERRIDES = {'syntax_highlight': 'short', 'math_output': 'MathML', 'smart_quotes': True}
 
 def rst(fpath):
-    parts = publish_parts(source=open(fpath).read(), writer_name='html', settings_overrides=OVERRIDES)
+    parts = publish_parts(source=unicode(open(fpath).read(), encoding='utf-8'), writer_name='html', settings_overrides=OVERRIDES)
     return parts['title'], parts['html_body']
 
 class Restructured(Extension):

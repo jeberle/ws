@@ -3,6 +3,7 @@
 <head>
 <link href='{{ ws }}/style.css' media='screen' rel='stylesheet' type='text/css'>
 <meta http-equiv='Content-Type' content='text/html; charset=utf-8'>
+{% autoescape true %}
 <title>{{ title }}</title>
 </head>
 <body>
@@ -13,4 +14,5 @@
 {% endfor %}
 </ul>
 </body>
+{% endautoescape %}
 </html>{# vi: set ft=htmldjango: #}

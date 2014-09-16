@@ -13,7 +13,7 @@ DIR = os.path.dirname(os.path.abspath(__file__))
 
 # system templates
 
-SYS_ENV = Environment(autoescape=True, trim_blocks=True, lstrip_blocks=True,
+SYS_ENV = Environment(autoescape=False, trim_blocks=True, lstrip_blocks=True,
     loader=FileSystemLoader([DIR]),
     extensions=['jinja2.ext.autoescape'])
 
@@ -25,7 +25,7 @@ def render_sys(fpath, root, **kwargs):
 
 # external templates
 
-EXT_ENV = Environment(autoescape=True, trim_blocks=True, lstrip_blocks=True,
+EXT_ENV = Environment(autoescape=False, trim_blocks=True, lstrip_blocks=True,
     loader=FileSystemLoader(['.', 'templates']),
     extensions=['jinja2.ext.autoescape', Pygments, Markdown, Restructured, Textile])
 

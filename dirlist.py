@@ -6,6 +6,7 @@ import urllib
 from tmpl import render_sys
 
 def dirlist(root, fpath):
+    fpath = os.path.normpath(fpath)
     return render_sys('dirlist.html', root, title=fpath, rows=rows(root, fpath))
 
 def rows(root, fpath):
@@ -16,7 +17,9 @@ def rows(root, fpath):
         url = '%s/%s' % (root, os.path.dirname(fpath))
         yield {'url': urllib.quote_plus(url, '/'), 'name': '[..]'}
     for name in sorted(names, cmp_name):
-        url = '%s/%s' % (root, os.path.join(fpath, name))
+        fpath2 = os.path.join(fpath, name)
+        fpath2 = fpath2 + '/' if os.path.isdir(fpath2) else fpath2
+        url = '%s/%s' % (root, fpath2)
         yield {'url': urllib.quote_plus(url, '/'), 'name': name}
 
 def cmp_name(a, b):

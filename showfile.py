@@ -40,8 +40,8 @@ def showfile(root, fpath):
     # render file based on file ext
     if ext in EXT_MAP:
         title, body = EXT_MAP[ext](fpath)
-        title = title if title else fpath
         h1 = title if title else ''
+        title = title if title else fpath
         return render_sys('page.html', root, title=title, body=body, h1=h1)
     try:
         lexer = pygments.lexers.get_lexer_for_filename(fpath)

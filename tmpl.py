@@ -30,7 +30,7 @@ EXT_ENV = Environment(autoescape=False, trim_blocks=True, lstrip_blocks=True,
     extensions=['jinja2.ext.autoescape', Pygments, Markdown, Restructured, Textile])
 
 def render_ext(fpath, root, **kwargs):
-    d = {'root': root, 'now': datetime.now()}
+    d = {'root': root, 'ws': '%s/ws' % root, 'now': datetime.now()}
     d.update(kwargs)
     tmpl = EXT_ENV.get_template(fpath)
     return tmpl.render(d).encode('utf-8')

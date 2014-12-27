@@ -45,9 +45,12 @@ def showfile(root, fpath):
         return render_sys('page.html', root, title=title, body=body, h1=h1)
     try:
         lexer = pygments.lexers.get_lexer_for_filename(fpath)
+    except:
+        lexer = None
+    if lexer and ext != '.txt':
         body = highlight(lexer, fpath)
         return render_sys('page.html', root, title=fpath, body=body)
-    except:
+    else:
         # just try for text as <pre> block
         buf = unicode(open(fpath).read(), encoding='utf-8')
         body = u'<pre>%s</pre>' % cgi.escape(buf)
